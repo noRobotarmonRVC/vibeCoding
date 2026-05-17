@@ -1,0 +1,28 @@
+# Build output
+build/
+
+# Coverage reports
+coverage/
+*.gcov
+*.gcda
+*.gcno
+
+# CMake user files
+CMakeUserPresets.json
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compiled objects & binaries
+*.o
+*.a
+*.so
+*.out
