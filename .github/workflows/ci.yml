@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ clang-tidy gcovr
+
+      - name: Configure (with coverage)
+        run: cmake -S src -B build -DENABLE_COVERAGE=ON
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests
+        run: cd build && ctest --output-on-failure
+
+      - name: Coverage report
+        run: |
+          mkdir -p coverage
+          gcovr -r src build \
+            --exclude '../build/_deps' \
+            --html --html-details \
+            -o coverage/index.html \
+            --print-summary
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
