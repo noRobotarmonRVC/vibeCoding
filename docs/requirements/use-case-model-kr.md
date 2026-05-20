@@ -1,0 +1,172 @@
+# Use-Case Model
+
+## 1. Actor
+
+| Actor | 타입 | 설명 |
+|---|---|---|
+| User | Primary | 청소 세션을 시작하고 종료한다 |
+| Front Sensor | External System | 정면의 장애물을 감지; interrupt 방식 |
+| Left Sensor | External System | 좌측의 장애물을 감지; 주기적(periodic) |
+| Right Sensor | External System | 우측의 장애물을 감지; 주기적(periodic) |
+| Dust Sensor | External System | 바닥의 먼지를 감지; 주기적(periodic) |
+| Timer | External System | 주기적 동작을 구동하는 주기적 Tick 신호를 제공 |
+
+---
+
+## 2. Use-Case Diagram (텍스트 형식)
+
+```
+User ──────────────────────────────> UC-01: 청소 세션 시작
+                                     UC-06: 청소 세션 종료
+
+Timer ─────────────────────────────> UC-02: 탐색 및 청소
+                                        <<extend>> UC-03: 전방 장애물 회피
+                                        <<extend>> UC-04: 포위 상태 탈출
+                                        <<extend>> UC-05: 청소 강도 높이기
+
+Front Sensor ──────────────────────> UC-03: 전방 장애물 회피
+Left Sensor, Right Sensor ─────────> UC-04: 포위 상태 탈출
+Dust Sensor ───────────────────────> UC-05: 청소 강도 높이기
+```
+
+---
+
+## 3. Use Cases
+
+---
+
+### UC-01: 청소 세션 시작
+
+| 항목 | 내용 |
+|---|---|
+| **ID** | UC-01 |
+| **이름** | 청소 세션 시작 |
+| **Primary Actor** | User |
+| **간략 설명** | 사용자가 청소 세션을 시작한다; RVC가 전진하며 청소를 시작한다. |
+| **사전 조건** | RVC 전원이 켜져 있고 idle 상태다. |
+| **사후 조건** | RVC가 전진하며 청소 중인 활성 상태다. |
+
+**주요 성공 시나리오:**
+
+1. User가 RVC에 시작 명령을 내린다.
+2. 시스템이 Cleaner를 활성화한다 (On).
+3. 시스템이 Motor에 Forward 명령을 내린다.
+4. 시스템이 활성 청소 루프(UC-02)에 진입한다.
+
+---
+
+### UC-02: 탐색 및 청소
+
+| 항목 | 내용 |
+|---|---|
+| **ID** | UC-02 |
+| **이름** | 탐색 및 청소 |
+| **Primary Actor** | Timer |
+| **간략 설명** | 매 Tick마다 시스템이 센서 상태를 평가하고 다음 navigation 및 청소 동작을 결정한다. |
+| **사전 조건** | 청소 세션이 활성 상태다 (UC-01 완료). |
+| **사후 조건** | 현재 Tick에 대한 Motor direction과 cleaner 상태가 업데이트된다. |
+
+**주요 성공 시나리오 (장애물 없음, 먼지 없음):**
+
+1. Timer가 Tick을 발생시킨다.
+2. 시스템이 Left Sensor, Right Sensor, Dust Sensor 상태를 읽는다.
+3. 모든 센서가 False를 보고한다 (장애물 없음, 먼지 없음).
+4. 시스템이 Motor 명령을 Forward로 유지한다.
+5. 시스템이 Cleaner 명령을 On으로 유지한다.
+
+**대안 흐름:**
+
+| 조건 | 확장 |
+|---|---|
+| Front Sensor interrupt 발생 (전방 장애물) | → UC-03: 전방 장애물 회피 |
+| Front Sensor = True AND Left Sensor = True AND Right Sensor = True | → UC-04: 포위 상태 탈출 |
+| Dust Sensor = True | → UC-05: 청소 강도 높이기 |
+
+---
+
+### UC-03: 전방 장애물 회피
+
+| 항목 | 내용 |
+|---|---|
+| **ID** | UC-03 |
+| **이름** | 전방 장애물 회피 |
+| **Primary Actor** | Front Sensor |
+| **간략 설명** | 전방 장애물이 감지되고 RVC가 완전히 포위되지 않은 경우, RVC가 정지하고 개방된 측면으로 회전한 뒤 전진 navigation을 재개한다. |
+| **사전 조건** | 청소 세션이 활성 상태. Front Sensor가 True를 발생시킴. 좌측 또는 우측이 차단되지 않음. |
+| **사후 조건** | RVC가 새로운 방향으로 전진 중이며, Cleaner는 On 상태를 유지한다. |
+
+**주요 성공 시나리오:**
+
+1. Front Sensor가 True와 함께 interrupt를 트리거한다.
+2. 시스템이 Motor에 Stop 명령을 내린다.
+3. 시스템이 Left Sensor와 Right Sensor를 읽는다.
+4. 최소 한 측면이 개방되어 있다 (Left = False 또는 Right = False).
+5. 시스템이 개방된 측면(Left 또는 Right)을 선택하고 Motor에 해당 방향으로 회전 명령을 내린다.
+6. 시스템이 Motor에 Forward 명령을 내린다.
+7. Cleaner는 On 상태를 유지한다.
+
+**대안 흐름 — 양쪽 모두 차단:**
+
+- 4단계: Left = True AND Right = True → UC-04로 이전.
+
+---
+
+### UC-04: 포위 상태 탈출
+
+| 항목 | 내용 |
+|---|---|
+| **ID** | UC-04 |
+| **이름** | 포위 상태 탈출 |
+| **Primary Actor** | Front Sensor, Left Sensor, Right Sensor |
+| **간략 설명** | 세 방향(전방, 좌측, 우측) 모두에서 장애물이 감지되면, RVC가 후진하고 가능한 측면으로 회전한 뒤 재개한다. |
+| **사전 조건** | 청소 세션이 활성 상태. Front = True AND Left = True AND Right = True. |
+| **사후 조건** | RVC가 새로운 방향으로 전진 중이며, Cleaner는 On 상태를 유지한다. |
+
+**주요 성공 시나리오:**
+
+1. 시스템이 Front = True AND Left = True AND Right = True를 감지한다.
+2. 시스템이 Motor에 Backward 명령을 내린다.
+3. 시스템이 회전 방향(Left 또는 Right)을 선택한다.
+4. 시스템이 Motor에 선택한 방향으로 회전 명령을 내린다.
+5. 시스템이 Motor에 Forward 명령을 내린다.
+6. Cleaner는 On 상태를 유지한다.
+
+---
+
+### UC-05: 청소 강도 높이기
+
+| 항목 | 내용 |
+|---|---|
+| **ID** | UC-05 |
+| **이름** | 청소 강도 높이기 |
+| **Primary Actor** | Dust Sensor |
+| **간략 설명** | Dust Sensor가 먼지를 감지하면 Cleaner 전력이 일시적으로 증가한다. |
+| **사전 조건** | 청소 세션이 활성 상태. Dust Sensor = True. |
+| **사후 조건** | 강화 기간이 끝나면 Cleaner가 정상 전력(On)으로 복귀한다. |
+
+**주요 성공 시나리오:**
+
+1. Dust Sensor가 True를 보고한다.
+2. 시스템이 Cleaner에 Power Up 명령을 내린다.
+3. 시스템이 UC-02에 따라 navigation을 계속한다.
+4. 강화 지속 시간이 경과하면, 시스템이 Cleaner에 On(정상) 명령을 내린다.
+
+---
+
+### UC-06: 청소 세션 종료
+
+| 항목 | 내용 |
+|---|---|
+| **ID** | UC-06 |
+| **이름** | 청소 세션 종료 |
+| **Primary Actor** | User |
+| **간략 설명** | 사용자가 청소 세션을 종료한다; RVC가 이동을 멈추고 Cleaner를 끈다. |
+| **사전 조건** | 청소 세션이 활성 상태. |
+| **사후 조건** | RVC가 idle 상태; Motor 정지; Cleaner Off. |
+
+**주요 성공 시나리오:**
+
+1. User가 RVC에 정지 명령을 내린다.
+2. 시스템이 Motor에 Stop 명령을 내린다.
+3. 시스템이 Cleaner에 Off 명령을 내린다.
+4. 시스템이 활성 청소 루프에서 나온다.
