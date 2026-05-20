@@ -58,12 +58,13 @@ const std::vector<CleanPower>&      Simulator::cleanerLog() const { return _clea
 // ── private helpers ────────────────────────────────────────────────────────────
 
 bool Simulator::isBlocked(Position p) const {
-    if (p.x < 0 || p.x >= _grid_width || p.y < 0 || p.y >= _grid_height)
+    if (p.x < 0 || p.x >= _grid_width || p.y < 0 || p.y >= _grid_height) {
         return true;
+    }
     return _obstacles.count({p.x, p.y}) > 0;
 }
 
-Position Simulator::adjacentCell(Position p, Heading h) const {
+Position Simulator::adjacentCell(Position p, Heading h) {
     switch (h) {
         case Heading::NORTH: return {p.x,     p.y - 1};
         case Heading::EAST:  return {p.x + 1, p.y    };
@@ -73,7 +74,7 @@ Position Simulator::adjacentCell(Position p, Heading h) const {
     return p;
 }
 
-Heading Simulator::turnLeft(Heading h) const {
+Heading Simulator::turnLeft(Heading h) {
     switch (h) {
         case Heading::NORTH: return Heading::WEST;
         case Heading::WEST:  return Heading::SOUTH;
@@ -83,7 +84,7 @@ Heading Simulator::turnLeft(Heading h) const {
     return h;
 }
 
-Heading Simulator::turnRight(Heading h) const {
+Heading Simulator::turnRight(Heading h) {
     switch (h) {
         case Heading::NORTH: return Heading::EAST;
         case Heading::EAST:  return Heading::SOUTH;
@@ -99,14 +100,14 @@ void Simulator::applyPendingMotorCommands() {
         switch (log[i]) {
             case Direction::FORWARD: {
                 Position next = adjacentCell(_pos, _heading);
-                if (!isBlocked(next)) _pos = next;
+                if (!isBlocked(next)) { _pos = next; }
                 break;
             }
             case Direction::BACKWARD: {
                 // opposite of current heading = two left-turns
                 Heading opp  = turnLeft(turnLeft(_heading));
                 Position next = adjacentCell(_pos, opp);
-                if (!isBlocked(next)) _pos = next;
+                if (!isBlocked(next)) { _pos = next; }
                 break;
             }
             case Direction::LEFT:

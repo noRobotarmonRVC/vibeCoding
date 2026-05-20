@@ -16,10 +16,11 @@ static void step(Simulator& sim, GridDisplay& display, int& tick,
 }
 
 int main() {
-    const int W = 22, H = 12;
+    const int grid_w = 22;
+    const int grid_h = 12;
 
-    Simulator   sim(W, H, {1, 5}, Heading::EAST);
-    GridDisplay display(W, H);
+    Simulator   sim(grid_w, grid_h, {1, 5}, Heading::EAST);
+    GridDisplay display(grid_w, grid_h);
     int tick = 0;
 
     // ── map layout ────────────────────────────────────────────────────────────
@@ -40,13 +41,13 @@ int main() {
     //  +--------------------------------------------+
 
     // Top-right corridor wall (C-shape facing left, open at y=5)
-    for (int x = 5; x <= 9;  ++x) sim.placeObstacle(x, 2);   // top bar
-    for (int y = 3; y <= 4;  ++y) sim.placeObstacle(9, y);   // right side top
-    for (int y = 7; y <= 8;  ++y) sim.placeObstacle(9, y);   // right side bottom
-    for (int x = 5; x <= 14; ++x) sim.placeObstacle(x, 8);   // bottom bar
+    for (int x = 5; x <= 9;  ++x) { sim.placeObstacle(x, 2); }   // top bar
+    for (int y = 3; y <= 4;  ++y) { sim.placeObstacle(9, y); }   // right side top
+    for (int y = 7; y <= 8;  ++y) { sim.placeObstacle(9, y); }   // right side bottom
+    for (int x = 5; x <= 14; ++x) { sim.placeObstacle(x, 8); }   // bottom bar
 
     // Vertical wall at x=16 (open bottom)
-    for (int y = 3; y <= 7; ++y) sim.placeObstacle(16, y);
+    for (int y = 3; y <= 7; ++y) { sim.placeObstacle(16, y); }
 
     // ── demo ─────────────────────────────────────────────────────────────────
     // Clear screen once before animation starts
@@ -58,19 +59,22 @@ int main() {
     std::this_thread::sleep_for(600ms);
 
     // Phase 1: Forward navigation toward the C-wall
-    for (int i = 0; i < 12; ++i)
+    for (int i = 0; i < 12; ++i) {
         step(sim, display, tick);
+    }
 
     // Phase 2: Inject dust — intensify for INTENSIFY_DURATION ticks
     sim.injectDust(true);
     step(sim, display, tick);
     sim.injectDust(false);
-    for (int i = 0; i < RvcController::INTENSIFY_DURATION; ++i)
+    for (int i = 0; i < RvcController::INTENSIFY_DURATION; ++i) {
         step(sim, display, tick);
+    }
 
     // Phase 3: Continue navigating — RVC will encounter obstacles and walls
-    for (int i = 0; i < 55; ++i)
+    for (int i = 0; i < 55; ++i) {
         step(sim, display, tick);
+    }
 
     // Phase 4: Stop
     sim.stop();

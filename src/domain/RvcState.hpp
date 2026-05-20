@@ -1,6 +1,7 @@
 #pragma once
+#include <cstdint>
 
-enum class RvcState {
+enum class RvcState : std::uint8_t {
     IDLE,
     CLEANING,
     AVOIDING_OBSTACLE,

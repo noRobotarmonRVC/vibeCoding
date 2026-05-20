@@ -15,14 +15,14 @@ class MockMotor : public IMotorController {
 public:
     std::vector<Direction> log;
     void move(Direction d) override { log.push_back(d); }
-    Direction last() const { return log.empty() ? Direction::STOP : log.back(); }
+    [[nodiscard]] Direction last() const { return log.empty() ? Direction::STOP : log.back(); }
 };
 
 class MockCleaner : public ICleanerController {
 public:
     std::vector<CleanPower> log;
     void setPower(CleanPower p) override { log.push_back(p); }
-    CleanPower last() const { return log.empty() ? CleanPower::OFF : log.back(); }
+    [[nodiscard]] CleanPower last() const { return log.empty() ? CleanPower::OFF : log.back(); }
 };
 
 // ── fixture ───────────────────────────────────────────────────────────────────
@@ -75,8 +75,9 @@ TEST_F(RvcControllerTest, CleaningPowerRestoresAfterIntensifyDuration) {
     controller.onTick();
     dust.state = false;
 
-    for (int i = 0; i < RvcController::INTENSIFY_DURATION; ++i)
+    for (int i = 0; i < RvcController::INTENSIFY_DURATION; ++i) {
         controller.onTick();
+    }
 
     EXPECT_EQ(cleaner.last(), CleanPower::ON);
 }
@@ -92,7 +93,7 @@ TEST_F(RvcControllerTest, FrontObstacleOpenSidesTurnsLeft) {
     controller.onFrontObstacleDetected();
 
     // STOP → LEFT → FORWARD
-    ASSERT_GE(motor.log.size(), 3u);
+    ASSERT_GE(motor.log.size(), 3U);
     EXPECT_EQ(motor.log[0], Direction::STOP);
     EXPECT_EQ(motor.log[1], Direction::LEFT);
     EXPECT_EQ(motor.log[2], Direction::FORWARD);
@@ -106,7 +107,7 @@ TEST_F(RvcControllerTest, FrontObstacleLeftBlockedTurnsRight) {
 
     controller.onFrontObstacleDetected();
 
-    ASSERT_GE(motor.log.size(), 3u);
+    ASSERT_GE(motor.log.size(), 3U);
     EXPECT_EQ(motor.log[0], Direction::STOP);
     EXPECT_EQ(motor.log[1], Direction::RIGHT);
     EXPECT_EQ(motor.log[2], Direction::FORWARD);
@@ -121,7 +122,7 @@ TEST_F(RvcControllerTest, SurroundedEscapesBackwardThenLeftThenForward) {
     controller.onFrontObstacleDetected();
 
     // STOP → BACKWARD → LEFT → FORWARD
-    ASSERT_GE(motor.log.size(), 4u);
+    ASSERT_GE(motor.log.size(), 4U);
     EXPECT_EQ(motor.log[0], Direction::STOP);
     EXPECT_EQ(motor.log[1], Direction::BACKWARD);
     EXPECT_EQ(motor.log[2], Direction::LEFT);

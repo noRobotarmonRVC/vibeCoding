@@ -1,6 +1,7 @@
 #pragma once
+#include <cstdint>
 
-enum class Heading { NORTH, EAST, SOUTH, WEST };
+enum class Heading : std::uint8_t { NORTH, EAST, SOUTH, WEST };
 
 inline const char* toString(Heading h) {
     switch (h) {

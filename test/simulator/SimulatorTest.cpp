@@ -30,8 +30,9 @@ TEST(SimulatorTest, DustPowersUpCleanerThenRestores) {
     sim.injectDust(false);
     EXPECT_EQ(sim.lastPower(), CleanPower::POWER_UP);
 
-    for (int i = 0; i < RvcController::INTENSIFY_DURATION; ++i)
+    for (int i = 0; i < RvcController::INTENSIFY_DURATION; ++i) {
         sim.tick();
+    }
 
     EXPECT_EQ(sim.lastPower(), CleanPower::ON);
 }

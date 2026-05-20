@@ -1,6 +1,7 @@
 #pragma once
+#include <cstdint>
 
-enum class Direction { FORWARD, BACKWARD, LEFT, RIGHT, STOP };
+enum class Direction : std::uint8_t { FORWARD, BACKWARD, LEFT, RIGHT, STOP };
 
 inline const char* toString(Direction d) {
     switch (d) {

@@ -17,7 +17,7 @@ void GridDisplay::render(Position rvc, Heading heading,
 
     // Top border
     std::cout << '+';
-    for (int x = 0; x < _width; ++x) std::cout << "--";
+    for (int x = 0; x < _width; ++x) { std::cout << "--"; }
     std::cout << "+\n";
 
     // Rows
@@ -26,7 +26,7 @@ void GridDisplay::render(Position rvc, Heading heading,
         for (int x = 0; x < _width; ++x) {
             if (x == rvc.x && y == rvc.y) {
                 std::cout << GREEN << toArrow(heading) << ' ' << RESET;
-            } else if (obstacles.count({x, y})) {
+            } else if (obstacles.count({x, y}) != 0U) {
                 std::cout << RED << "X " << RESET;
             } else {
                 std::cout << ". ";
@@ -37,7 +37,7 @@ void GridDisplay::render(Position rvc, Heading heading,
 
     // Bottom border
     std::cout << '+';
-    for (int x = 0; x < _width; ++x) std::cout << "--";
+    for (int x = 0; x < _width; ++x) { std::cout << "--"; }
     std::cout << "+\n";
 
     // Status line

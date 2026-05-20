@@ -9,8 +9,8 @@ public:
         _log.push_back(direction);
     }
 
-    Direction last() const { return _last; }
-    const std::vector<Direction>& log() const { return _log; }
+    [[nodiscard]] Direction last() const { return _last; }
+    [[nodiscard]] const std::vector<Direction>& log() const { return _log; }
     void clearLog() { _log.clear(); }
 
 private:

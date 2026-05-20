@@ -27,8 +27,9 @@ void RvcController::stop() {
 }
 
 void RvcController::onTick() {
-    if (_state == RvcState::IDLE)
+    if (_state == RvcState::IDLE) {
         return;
+    }
 
     if (_state == RvcState::INTENSIFYING) {
         if (--_intensify_ticks <= 0) {
@@ -46,8 +47,9 @@ void RvcController::onTick() {
 }
 
 void RvcController::onFrontObstacleDetected() {
-    if (_state == RvcState::IDLE)
+    if (_state == RvcState::IDLE) {
         return;
+    }
 
     _motor->move(Direction::STOP);
 

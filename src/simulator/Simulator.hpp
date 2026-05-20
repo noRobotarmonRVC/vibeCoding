@@ -32,22 +32,22 @@ public:
     void placeObstacle(int x, int y);
 
     // Observation
-    Direction  lastDirection() const;
-    CleanPower lastPower()     const;
-    Position   pos()           const;
-    Heading    heading()       const;
-    int        gridWidth()     const;
-    int        gridHeight()    const;
+    [[nodiscard]] Direction  lastDirection() const;
+    [[nodiscard]] CleanPower lastPower()     const;
+    [[nodiscard]] Position   pos()           const;
+    [[nodiscard]] Heading    heading()       const;
+    [[nodiscard]] int        gridWidth()     const;
+    [[nodiscard]] int        gridHeight()    const;
 
-    const std::set<std::pair<int,int>>& obstacles()   const;
-    const std::vector<Direction>&       motorLog()    const;
-    const std::vector<CleanPower>&      cleanerLog()  const;
+    [[nodiscard]] const std::set<std::pair<int,int>>& obstacles()   const;
+    [[nodiscard]] const std::vector<Direction>&       motorLog()    const;
+    [[nodiscard]] const std::vector<CleanPower>&      cleanerLog()  const;
 
 private:
-    bool     isBlocked(Position p)             const;
-    Position adjacentCell(Position p, Heading h) const;
-    Heading  turnLeft(Heading h)               const;
-    Heading  turnRight(Heading h)              const;
+    [[nodiscard]] bool     isBlocked(Position p)               const;
+    [[nodiscard]] static Position adjacentCell(Position p, Heading h);
+    [[nodiscard]] static Heading  turnLeft(Heading h);
+    [[nodiscard]] static Heading  turnRight(Heading h);
     void     applyPendingMotorCommands();
 
     int     _grid_width;

@@ -5,5 +5,5 @@
 
 class ConsoleDisplay {
 public:
-    void render(Direction dir, CleanPower power);
+    static void render(Direction dir, CleanPower power);
 };

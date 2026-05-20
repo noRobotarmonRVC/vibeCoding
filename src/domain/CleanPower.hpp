@@ -1,6 +1,7 @@
 #pragma once
+#include <cstdint>
 
-enum class CleanPower { OFF, ON, POWER_UP };
+enum class CleanPower : std::uint8_t { OFF, ON, POWER_UP };
 
 inline const char* toString(CleanPower p) {
     switch (p) {

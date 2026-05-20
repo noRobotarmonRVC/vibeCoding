@@ -9,8 +9,8 @@ public:
         _log.push_back(power);
     }
 
-    CleanPower last() const { return _last; }
-    const std::vector<CleanPower>& log() const { return _log; }
+    [[nodiscard]] CleanPower last() const { return _last; }
+    [[nodiscard]] const std::vector<CleanPower>& log() const { return _log; }
     void clearLog() { _log.clear(); }
 
 private:
