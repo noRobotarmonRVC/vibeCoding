@@ -43,19 +43,22 @@ cd build && ctest --output-on-failure
 ```
 OOADProject/
 ├── src/
-│   ├── interfaces/        # 인터페이스 헤더 (ISensor, IMotorController 등)
-│   ├── domain/            # 비즈니스 로직 (DefaultNavigationStrategy, enum 정의)
-│   ├── hal/               # 하드웨어 추상화 계층 (FrontSensor, DustSensor 등)
-│   ├── app/               # 애플리케이션 계층 (RvcController, main.cpp)
-│   ├── simulator/         # 시뮬레이터 (하드웨어를 소프트웨어로 대체)
-│   └── ui/                # 콘솔 UI (ConsoleDisplay)
+│   ├── interfaces/        # ISensor, IMotorController, ICleanerController, INavigationStrategy
+│   ├── domain/            # DefaultNavigationStrategy, SensorData, Position, Heading, enum 정의
+│   ├── hal/               # FrontSensor, LeftSensor, RightSensor, DustSensor
+│   ├── app/               # RvcController, main.cpp
+│   ├── simulator/         # Simulator, SimulatedMotor, SimulatedCleaner, SimulatedSensor
+│   └── ui/                # ConsoleDisplay, GridDisplay
 ├── test/
-│   ├── app/               # RvcController 단위 테스트
-│   ├── domain/            # DefaultNavigationStrategy 단위 테스트
-│   └── simulator/         # 통합 테스트
+│   ├── app/               # RvcControllerTest
+│   ├── domain/            # DefaultNavigationStrategyTest
+│   └── simulator/         # SimulatorTest (통합 테스트)
 ├── docs/
-│   ├── requirements/      # 비전, 유스케이스 모델, 보충 명세, 용어집
-│   └── design/            # 도메인 모델, 설계 모델, SW 아키텍처 문서
+│   ├── requirements/      # Vision, Use-Case Model, System Operation Interface,
+│   │                      # Supplementary Specification, Glossary
+│   ├── design/            # Domain Model, Design Model, SW Architecture
+│   ├── decisions/         # Architecture Decision Records (ADR)
+│   └── failures/          # 실패 사례 및 해결 기록
 ├── .gitignore
 ├── CLAUDE.md
 └── README.md
@@ -74,10 +77,11 @@ OOADProject/
 ├──────────────────────────────────────────────┤
 │              Domain Layer                     │
 │   DefaultNavigationStrategy  SensorData       │
+│   Position · Heading                          │
 │   RvcState · Direction · CleanPower (enum)    │
 ├──────────────────────────────────────────────┤
 │             Interface Layer                   │
-│   ISensor  IMotorController  ICleaner...      │
+│   ISensor  IMotorController  ICleanerController│
 │   INavigationStrategy                         │
 ├──────────────────────────────────────────────┤
 │      Hardware Abstraction Layer (HAL)         │
@@ -100,36 +104,21 @@ OOADProject/
 ### 상태 머신 (`RvcState`)
 
 ```
-IDLE ──start()──► CLEANING ──front obstacle──► AVOIDING_OBSTACLE
-                     ▲                               │
-                     │         left/right blocked    │
-                     │              ▼                │
-                  INTENSIFYING ◄── ESCAPING ◄────────┘
-                     │
-                  (dust 감지 후 일정 Tick 경과 시 CLEANING으로 복귀)
+                         dust 감지
+              ┌─────────────────────────► INTENSIFYING
+              │                               │
+              │                        Tick 경과 후 복귀
+              │                               │
+IDLE ─startCleaning()─► CLEANING ◄───────────┘
+                            │  ▲
+               front obstacle│  │열린 방향 확보 후 복귀
+                            ▼  │
+                     AVOIDING_OBSTACLE
+                            │
+                    좌우 모두 차단
+                            ▼
+                         ESCAPING ──후진 후 전진──► CLEANING
 ```
-
----
-
-## 테스트 전략
-
-- **단위 테스트**: Google Test + GMock으로 각 클래스를 독립적으로 검증합니다. 하드웨어 의존성은 Mock으로 대체합니다.
-- **통합 테스트**: `Simulator`가 실제 하드웨어 대신 `IMotorController`, `ICleanerController`, `ISensor`를 구현하여 전체 제어 루프를 검증합니다.
-
----
-
-## 네이밍 규칙
-
-| 대상 | 스타일 | 예시 |
-|---|---|---|
-| 클래스 | PascalCase | `SensorController` |
-| 인터페이스 | `I` 접두사 | `ISensor` |
-| 추상 클래스 | `Abstract` 접두사 | `AbstractCleaner` |
-| 메서드 | camelCase | `detectObstacle()` |
-| public 변수 | snake_case | `front_sensor` |
-| private 변수 | `_` 접두사 snake_case | `_speed` |
-| 상수 | UPPER_SNAKE_CASE | `MAX_SPEED` |
-| 디렉터리 | kebab-case | `sensor-drivers/` |
 
 ---
 

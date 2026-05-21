@@ -13,20 +13,37 @@
 
 ---
 
-## 2. Use-Case Diagram (Textual)
+## 2. Use-Case Diagram
 
-```
-User ──────────────────────────────> UC-01: Start Cleaning Session
-                                     UC-06: Stop Cleaning Session
+```mermaid
+graph LR
+    User(["👤 User"])
+    Timer(["⏱ Timer"])
+    FrontSensor(["📡 Front Sensor"])
+    LeftSensor(["📡 Left Sensor"])
+    RightSensor(["📡 Right Sensor"])
+    DustSensor(["📡 Dust Sensor"])
 
-Timer ─────────────────────────────> UC-02: Navigate and Clean
-                                        <<extend>> UC-03: Avoid Front Obstacle
-                                        <<extend>> UC-04: Escape Surrounded State
-                                        <<extend>> UC-05: Intensify Cleaning
+    UC01("UC-01\nStart Cleaning Session")
+    UC02("UC-02\nNavigate and Clean")
+    UC03("UC-03\nAvoid Front Obstacle")
+    UC04("UC-04\nEscape Surrounded State")
+    UC05("UC-05\nIntensify Cleaning")
+    UC06("UC-06\nStop Cleaning Session")
 
-Front Sensor ──────────────────────> UC-03: Avoid Front Obstacle
-Left Sensor, Right Sensor ─────────> UC-04: Escape Surrounded State
-Dust Sensor ───────────────────────> UC-05: Intensify Cleaning
+    User --> UC01
+    User --> UC06
+
+    Timer --> UC02
+    UC02 -- "<<extend>>" --> UC03
+    UC02 -- "<<extend>>" --> UC04
+    UC02 -- "<<extend>>" --> UC05
+
+    FrontSensor --> UC03
+    FrontSensor --> UC04
+    LeftSensor --> UC04
+    RightSensor --> UC04
+    DustSensor --> UC05
 ```
 
 ---

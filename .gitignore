@@ -1,3 +1,7 @@
+# other settings
+venv/
+ppt/
+
 # Build output
 build/
 
