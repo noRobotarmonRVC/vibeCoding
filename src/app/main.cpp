@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 
 // ── Terminal raw mode ─────────────────────────────────────────────────────────
 
-static struct termios g_orig_termios;
+static struct termios g_orig_termios; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
 static void restoreTerminal() {
     tcsetattr(STDIN_FILENO, TCSANOW, &g_orig_termios);
@@ -75,10 +75,12 @@ static void processCommand(const std::string& line, Simulator& sim,
         if (ms < 50) { ms = 50; }
         tick_ms = ms;
     } else if (cmd == "dust") {
-        int x = 0, y = 0;
+        int x = 0;
+        int y = 0;
         if (ss >> x >> y) { sim.placeDust(x, y); }
     } else if (cmd == "obstacle") {
-        int x = 0, y = 0;
+        int x = 0;
+        int y = 0;
         if (ss >> x >> y) { sim.placeObstacle(x, y); }
     } else if (cmd == "help") {
         printHelp(grid_h);
@@ -89,6 +91,14 @@ static void processCommand(const std::string& line, Simulator& sim,
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
+static void setupObstacles(Simulator& sim) {
+    for (int x = 5; x <= 9;  ++x) { sim.placeObstacle(x, 2); }
+    for (int y = 3; y <= 4;  ++y) { sim.placeObstacle(9, y); }
+    for (int y = 7; y <= 8;  ++y) { sim.placeObstacle(9, y); }
+    for (int x = 5; x <= 14; ++x) { sim.placeObstacle(x, 8); }
+    for (int y = 3; y <= 7;  ++y) { sim.placeObstacle(16, y); }
+}
+
 int main() {
     const int grid_w = 22;
     const int grid_h = 12;
@@ -96,11 +106,7 @@ int main() {
     Simulator   sim(grid_w, grid_h, {1, 5}, Heading::EAST);
     GridDisplay display(grid_w, grid_h);
 
-    for (int x = 5; x <= 9;  ++x) { sim.placeObstacle(x, 2); }
-    for (int y = 3; y <= 4;  ++y) { sim.placeObstacle(9, y); }
-    for (int y = 7; y <= 8;  ++y) { sim.placeObstacle(9, y); }
-    for (int x = 5; x <= 14; ++x) { sim.placeObstacle(x, 8); }
-    for (int y = 3; y <= 7;  ++y) { sim.placeObstacle(16, y); }
+    setupObstacles(sim);
 
     std::mutex       sim_mutex;
     std::atomic<int>  tick_ms{300};
@@ -138,7 +144,7 @@ int main() {
     bool quit = false;
 
     while (!quit) {
-        char c;
+        char c = '\0';
         if (read(STDIN_FILENO, &c, 1) <= 0) { break; }
 
         std::lock_guard<std::mutex> lock(sim_mutex);

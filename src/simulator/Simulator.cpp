@@ -25,7 +25,7 @@ void Simulator::tick() {
 
     // Auto-inject dust sensor if robot is on a dust cell, then consume it
     auto dust_key = std::make_pair(_pos.x, _pos.y);
-    if (_dust_cells.count(dust_key)) {
+    if (_dust_cells.count(dust_key) != 0U) {
         _dust.inject(true);
         _dust_cells.erase(dust_key);
     } else {
