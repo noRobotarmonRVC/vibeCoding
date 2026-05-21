@@ -9,7 +9,7 @@ TEST(SimulatorTest, StartMovesForwardAndCleansOn) {
     EXPECT_EQ(sim.lastPower(), CleanPower::ON);
 }
 
-TEST(SimulatorTest, NormalTickIssuesNoNewCommands) {
+TEST(SimulatorTest, NormalTickReissuesForward) {
     Simulator sim;
     sim.start();
     const auto motor_count   = sim.motorLog().size();
@@ -17,7 +17,7 @@ TEST(SimulatorTest, NormalTickIssuesNoNewCommands) {
 
     sim.tick();
 
-    EXPECT_EQ(sim.motorLog().size(),   motor_count);
+    EXPECT_EQ(sim.motorLog().size(),   motor_count + 1);
     EXPECT_EQ(sim.cleanerLog().size(), cleaner_count);
 }
 
@@ -25,9 +25,8 @@ TEST(SimulatorTest, DustPowersUpCleanerThenRestores) {
     Simulator sim;
     sim.start();
 
-    sim.injectDust(true);
+    sim.placeDust(sim.pos().x, sim.pos().y);
     sim.tick();
-    sim.injectDust(false);
     EXPECT_EQ(sim.lastPower(), CleanPower::POWER_UP);
 
     for (int i = 0; i < RvcController::INTENSIFY_DURATION; ++i) {
