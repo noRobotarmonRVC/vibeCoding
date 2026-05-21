@@ -106,6 +106,16 @@ The RVC Control SW follows a **layered architecture** with a strict dependency r
 
 ---
 
+### AD-07: onTick() Must Re-Issue FORWARD Every Cycle
+
+**Decision:** `onTick()` appends `_motor->move(Direction::FORWARD)` at the end of every CLEANING or INTENSIFYING tick, rather than relying on the `FORWARD` issued in `start()`.
+
+**Rationale:** Hardware H-bridge drivers latch a direction until commanded otherwise, so a single `FORWARD` at startup is sufficient for real hardware. However, a motor command issued in one tick must be re-issued in the next tick to have effect — continuous forward motion requires a new FORWARD command each cycle.
+
+**Consequence:** Motor command log grows by one entry per tick during straight-line travel. This is acceptable as the log is only used for integration test verification and is never persisted.
+
+---
+
 ## 5. Source Directory Layout
 
 ```
@@ -118,9 +128,9 @@ src/
 │   └── INavigationStrategy.hpp
 ├── domain/
 │   ├── SensorData.hpp
-│   ├── Direction.hpp          ← Direction enum
-│   ├── CleanPower.hpp         ← CleanPower enum
-│   ├── RvcState.hpp           ← RvcState enum
+│   ├── Direction.hpp
+│   ├── CleanPower.hpp
+│   ├── RvcState.hpp
 │   └── DefaultNavigationStrategy.hpp / .cpp
 ├── hal/
 │   ├── FrontSensor.hpp / .cpp
@@ -134,7 +144,6 @@ src/
 
 ```
 test/
-├── CMakeLists.txt
 ├── domain/
 │   └── DefaultNavigationStrategyTest.cpp
 └── app/
